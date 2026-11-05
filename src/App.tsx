@@ -242,7 +242,7 @@ export default function App() {
               </div>
               <div className="leading-none">
                 <div className="font-extrabold text-base tracking-tight flex items-center gap-1.5">
-                  <span>EDIT<span className="text-amber-400">LOCK</span></span>
+                  <span>ZIK<span className="text-amber-400">RO</span></span>
                   <span className="text-[9px] bg-amber-500/10 text-amber-400 border border-amber-500/30 px-1.5 py-0.5 rounded font-mono font-medium">
                     ANTI-GHOSTING
                   </span>
@@ -546,7 +546,7 @@ export default function App() {
                   <div className="flex items-center gap-2.5">
                     <Smartphone className="w-4 h-4 text-amber-400 shrink-0" />
                     <div>
-                      <div className="font-semibold text-neutral-200">How EditLock Review Works:</div>
+                      <div className="font-semibold text-neutral-200">How Zikro Review Works:</div>
                       <div className="text-[11px] text-neutral-400">
                         1. Tap timeline to leave point-to-point notes • 2. Hit "Approve & Pay" when satisfied • 3. Instant watermark removal!
                       </div>

@@ -68,7 +68,7 @@ export const ThumbnailReviewer: React.FC<ThumbnailReviewerProps> = ({
                       WebkitTextStroke: '0.5px rgba(255,255,255,0.8)'
                     }}
                   >
-                    {project.watermarkSettings.text || 'EDITLOCK PREVIEW'}
+                    {project.watermarkSettings.text || 'ZIKRO PREVIEW'}
                   </div>
                   <div className="text-[9px] text-amber-300 font-mono tracking-wider drop-shadow">
                     UNPAID • DO NOT PUBLISH
@@ -79,7 +79,7 @@ export const ThumbnailReviewer: React.FC<ThumbnailReviewerProps> = ({
 
             {/* Bottom Bar */}
             <div className="p-2 bg-gradient-to-t from-black/60 to-transparent text-center text-[9px] font-mono text-neutral-400">
-              PROTECTED BY EDITLOCK • UNLOCK CLEAN HD IMAGE VIA UPI
+              PROTECTED BY ZIKRO • UNLOCK CLEAN HD IMAGE VIA UPI
             </div>
           </div>
         )}

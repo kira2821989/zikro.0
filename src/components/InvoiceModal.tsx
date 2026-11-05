@@ -15,7 +15,7 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
 }) => {
   if (!isOpen) return null;
 
-  const invoiceNo = `EL-${project.id.slice(-6).toUpperCase()}-${new Date().getFullYear()}`;
+  const invoiceNo = `ZK-${project.id.slice(-6).toUpperCase()}-${new Date().getFullYear()}`;
   const isPaid = project.status === 'paid_unlocked';
 
   const handlePrint = () => {
@@ -54,7 +54,7 @@ export const InvoiceModal: React.FC<InvoiceModalProps> = ({
           <div className="flex justify-between items-start border-b border-neutral-200 pb-5">
             <div>
               <h1 className="text-2xl font-black tracking-tight text-neutral-900">
-                EDIT<span className="text-amber-600">LOCK</span>
+                ZIK<span className="text-amber-600">RO</span>
               </h1>
               <p className="text-xs text-neutral-500 mt-0.5">Freelance Creative & Video Editing Services</p>
             </div>

@@ -1,5 +1,5 @@
 /**
- * EditLock IndexedDB Media Persistence Engine
+ * Zikro IndexedDB Media Persistence Engine
  * Enables zero-budget storage of full 1080p/4K client review videos
  * directly on the device with persistent playback across page reloads.
  */

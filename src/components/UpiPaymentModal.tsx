@@ -39,7 +39,7 @@ export const UpiPaymentModal: React.FC<UpiPaymentModalProps> = ({
   const upiId = project.upiId || 'creator@okhdfcbank';
   const payeeName = project.upiPayeeName || 'Freelance Editor';
   const amount = project.amountINR;
-  const note = `EditLock - ${project.title.slice(0, 25)}`;
+  const note = `Zikro - ${project.title.slice(0, 25)}`;
 
   // Standard NPCI UPI URI string
   const upiUri = `upi://pay?pa=${encodeURIComponent(upiId)}&pn=${encodeURIComponent(payeeName)}&am=${amount}&cu=INR&tn=${encodeURIComponent(note)}`;

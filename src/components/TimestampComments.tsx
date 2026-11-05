@@ -94,13 +94,13 @@ export const TimestampComments: React.FC<TimestampCommentsProps> = ({
   const handleCopyWhatsAppRevisions = () => {
     const pendingList = comments.filter(c => !c.resolved);
     if (pendingList.length === 0) {
-      navigator.clipboard.writeText('✅ All revisions have been completed and verified on EditLock!');
+      navigator.clipboard.writeText('✅ All revisions have been completed and verified on Zikro!');
     } else {
-      let msg = `🎬 *EditLock Video Revisions List*:\n\n`;
+      let msg = `🎬 *Zikro Video Revisions List*:\n\n`;
       pendingList.forEach((c, idx) => {
         msg += `${idx + 1}. [${c.formattedTime}] *${c.category.toUpperCase()}*: ${c.text}\n`;
       });
-      msg += `\n🔗 Review live at EditLock preview link.`;
+      msg += `\n🔗 Review live at Zikro preview link.`;
       navigator.clipboard.writeText(msg);
     }
     setCopied(true);

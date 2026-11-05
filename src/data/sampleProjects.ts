@@ -18,7 +18,7 @@ export const INITIAL_PROJECTS: Project[] = [
     createdAt: '2026-11-03T14:30:00.000Z',
     updatedAt: '2026-11-04T18:15:00.000Z',
     watermarkSettings: {
-      text: 'EDITLOCK • DRAFT REVIEW',
+      text: 'ZIKRO • DRAFT REVIEW',
       opacity: 0.28,
       speed: 'medium',
       style: 'diagonal-floating',
@@ -90,7 +90,7 @@ export const INITIAL_PROJECTS: Project[] = [
     createdAt: '2026-11-04T16:00:00.000Z',
     updatedAt: '2026-11-04T16:00:00.000Z',
     watermarkSettings: {
-      text: 'CONFIDENTIAL REVIEW • EDITLOCK',
+      text: 'CONFIDENTIAL REVIEW • ZIKRO',
       opacity: 0.30,
       speed: 'bouncing',
       style: 'bouncing-box',
@@ -178,7 +178,7 @@ export const INITIAL_PROJECTS: Project[] = [
     createdAt: '2026-11-04T12:00:00.000Z',
     updatedAt: '2026-11-04T12:00:00.000Z',
     watermarkSettings: {
-      text: 'UNPAID THUMBNAIL • EDITLOCK',
+      text: 'UNPAID THUMBNAIL • ZIKRO',
       opacity: 0.30,
       speed: 'slow',
       style: 'screen-tile',

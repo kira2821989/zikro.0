@@ -196,7 +196,7 @@ export const WatermarkOverlay: React.FC<WatermarkOverlayProps> = ({
                 WebkitTextStroke: '0.8px rgba(255, 255, 255, 0.85)'
               }}
             >
-              {settings.text || 'EDITLOCK PREVIEW'}
+              {settings.text || 'ZIKRO PREVIEW'}
             </div>
             
             <div className="mt-1 flex items-center justify-center gap-1.5 text-[11px] font-mono text-amber-300 tracking-wider font-semibold drop-shadow-[0_1px_3px_rgba(0,0,0,0.95)]">
@@ -211,7 +211,7 @@ export const WatermarkOverlay: React.FC<WatermarkOverlayProps> = ({
       {/* 3. Subtle Non-Intrusive Bottom Strip */}
       <div className="w-full bg-gradient-to-t from-black/60 to-transparent p-1.5 text-center">
         <span className="text-[9px] font-mono text-neutral-400/80 tracking-widest">
-          EDITLOCK SECURE PREVIEW • RELEASES AFTER UPI APPROVAL
+          ZIKRO SECURE PREVIEW • RELEASES AFTER UPI APPROVAL
         </span>
       </div>
     </div>

@@ -58,7 +58,7 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
   );
 
   // Watermark Settings
-  const [watermarkText, setWatermarkText] = useState(initialProject?.watermarkSettings?.text || 'EDITLOCK • DRAFT REVIEW');
+  const [watermarkText, setWatermarkText] = useState(initialProject?.watermarkSettings?.text || 'ZIKRO • DRAFT REVIEW');
   const [watermarkSpeed, setWatermarkSpeed] = useState<WatermarkSpeed>(initialProject?.watermarkSettings?.speed || 'medium');
   const [watermarkStyle, setWatermarkStyle] = useState<WatermarkStyle>(initialProject?.watermarkSettings?.style || 'diagonal-floating');
   const [watermarkOpacity, setWatermarkOpacity] = useState<number>(initialProject?.watermarkSettings?.opacity || 0.28);
@@ -146,7 +146,7 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
         originalFileName: localFileName || undefined
       },
       watermarkSettings: {
-        text: watermarkText.trim() || 'EDITLOCK • DRAFT REVIEW',
+        text: watermarkText.trim() || 'ZIKRO • DRAFT REVIEW',
         opacity: watermarkOpacity,
         speed: watermarkSpeed,
         style: watermarkStyle,
@@ -445,7 +445,7 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
                   type="text"
                   value={watermarkText}
                   onChange={(e) => setWatermarkText(e.target.value)}
-                  placeholder="EDITLOCK • DRAFT REVIEW"
+                  placeholder="ZIKRO • DRAFT REVIEW"
                   className="w-full bg-neutral-900 border border-neutral-700 text-neutral-200 text-xs rounded-xl px-3 py-1.5 focus:outline-none focus:border-amber-500 uppercase font-mono"
                 />
               </div>
