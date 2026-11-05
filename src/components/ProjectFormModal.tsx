@@ -1,6 +1,20 @@
 import React, { useState } from 'react';
-import { X, Upload, Film, Image as ImageIcon, Sparkles, Shield, DollarSign, User, Phone, Check } from 'lucide-react';
+import { 
+  X, 
+  Upload, 
+  Film, 
+  Image as ImageIcon, 
+  Shield, 
+  DollarSign, 
+  User, 
+  Phone, 
+  KeyRound, 
+  HardDrive, 
+  RefreshCw,
+  Check
+} from 'lucide-react';
 import { Project, MediaType, AspectRatio, WatermarkSpeed, WatermarkStyle } from '../types';
+import { storeMediaBlob, formatBytes } from '../utils/mediaDb';
 import { playClickPop } from '../utils/audio';
 
 interface ProjectFormModalProps {
@@ -31,8 +45,18 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
   const [upiId, setUpiId] = useState(initialProject?.upiId || localStorage.getItem('editlock_saved_upi') || 'editor@okhdfcbank');
   const [upiPayeeName, setUpiPayeeName] = useState(initialProject?.upiPayeeName || localStorage.getItem('editlock_saved_name') || 'Vikram Singh');
   const [mediaUrl, setMediaUrl] = useState(initialProject?.mediaUrl || PRESET_VIDEOS[0].url);
-  const [localFileName, setLocalFileName] = useState('');
-  
+  const [localFileName, setLocalFileName] = useState(initialProject?.storageInfo?.originalFileName || '');
+  const [pendingFileBlob, setPendingFileBlob] = useState<File | null>(null);
+  const [fileSizeBytes, setFileSizeBytes] = useState<number>(initialProject?.storageInfo?.fileSizeBytes || 0);
+  const [isSavingMedia, setIsSavingMedia] = useState(false);
+
+  // Security & Passcode
+  const [isProtected, setIsProtected] = useState(initialProject?.securitySettings?.isProtected ?? false);
+  const [passcode, setPasscode] = useState(
+    initialProject?.securitySettings?.passcode || 
+    Math.floor(1000 + Math.random() * 9000).toString()
+  );
+
   // Watermark Settings
   const [watermarkText, setWatermarkText] = useState(initialProject?.watermarkSettings?.text || 'EDITLOCK • DRAFT REVIEW');
   const [watermarkSpeed, setWatermarkSpeed] = useState<WatermarkSpeed>(initialProject?.watermarkSettings?.speed || 'medium');
@@ -46,8 +70,10 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
   const handleFileUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
-      const blobUrl = URL.createObjectURL(file);
-      setMediaUrl(blobUrl);
+      setPendingFileBlob(file);
+      setFileSizeBytes(file.size);
+      const tempUrl = URL.createObjectURL(file);
+      setMediaUrl(tempUrl);
       setLocalFileName(file.name);
       if (!title) {
         setTitle(file.name.replace(/\.[^/.]+$/, ''));
@@ -57,22 +83,45 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
   };
 
   const handleSelectPreset = (preset: typeof PRESET_VIDEOS[0]) => {
+    setPendingFileBlob(null);
     setMediaUrl(preset.url);
     setAspectRatio(preset.aspect);
     setLocalFileName('');
+    setFileSizeBytes(0);
     playClickPop();
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const generateRandomPin = () => {
+    const random = Math.floor(1000 + Math.random() * 9000).toString();
+    setPasscode(random);
+    playClickPop();
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!title.trim() || !clientName.trim() || !mediaUrl.trim()) return;
+
+    setIsSavingMedia(true);
 
     // Save default editor credentials for future projects
     localStorage.setItem('editlock_saved_upi', upiId);
     localStorage.setItem('editlock_saved_name', upiPayeeName);
 
+    const projectId = initialProject?.id || `proj-${Date.now().toString(36)}`;
+    let finalMediaUrl = mediaUrl.trim();
+
+    // Persist file into IndexedDB for 0-budget persistent playback
+    if (pendingFileBlob) {
+      try {
+        const stored = await storeMediaBlob(projectId, pendingFileBlob, localFileName || 'video.mp4');
+        finalMediaUrl = stored.objectUrl;
+      } catch (err) {
+        console.warn('IndexedDB persistence error:', err);
+      }
+    }
+
     const savedProject: Project = {
-      id: initialProject?.id || `proj-${Date.now().toString(36)}`,
+      id: projectId,
       title: title.trim(),
       type,
       aspectRatio,
@@ -81,14 +130,23 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
       amountINR: Number(amountINR) || 1000,
       upiId: upiId.trim(),
       upiPayeeName: upiPayeeName.trim(),
-      mediaUrl: mediaUrl.trim(),
+      mediaUrl: finalMediaUrl,
       status: initialProject?.status || 'in_review',
       createdAt: initialProject?.createdAt || new Date().toISOString(),
       updatedAt: new Date().toISOString(),
       comments: initialProject?.comments || [],
       paymentDetails: initialProject?.paymentDetails,
+      securitySettings: {
+        isProtected,
+        passcode: isProtected ? passcode : undefined
+      },
+      storageInfo: {
+        storageType: pendingFileBlob ? 'indexeddb' : 'cloud_url',
+        fileSizeBytes: fileSizeBytes || undefined,
+        originalFileName: localFileName || undefined
+      },
       watermarkSettings: {
-        text: watermarkText.trim() || 'DRAFT PREVIEW • PAYMENT PENDING',
+        text: watermarkText.trim() || 'EDITLOCK • DRAFT REVIEW',
         opacity: watermarkOpacity,
         speed: watermarkSpeed,
         style: watermarkStyle,
@@ -98,6 +156,7 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
       }
     };
 
+    setIsSavingMedia(false);
     onSave(savedProject);
     playClickPop();
     onClose();
@@ -116,7 +175,7 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
               <h3 className="text-base font-bold text-white">
                 {initialProject ? 'Edit Review Project' : 'Create New Client Review'}
               </h3>
-              <p className="text-xs text-neutral-400">Lock your video preview with anti-theft dynamic watermark & UPI unlock</p>
+              <p className="text-xs text-neutral-400">Lock your video preview with dynamic watermark, passcode & instant UPI</p>
             </div>
           </div>
           <button onClick={onClose} aria-label="Close" className="p-1.5 text-neutral-400 hover:text-white rounded-lg">
@@ -127,7 +186,7 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
         {/* Form Body */}
         <form onSubmit={handleSubmit} className="p-4 sm:p-5 overflow-y-auto space-y-4">
           
-          {/* Project Title & Media Type */}
+          {/* Project Title */}
           <div className="space-y-1.5">
             <label className="text-xs font-semibold text-neutral-300">Project / Video Title *</label>
             <input
@@ -182,18 +241,27 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
             </div>
           </div>
 
-          {/* Media Upload or URL Source */}
+          {/* Media Upload (IndexedDB 0-Cost Cache or Cloud URL) */}
           <div className="space-y-2 p-3 bg-neutral-950 rounded-2xl border border-neutral-800">
-            <label className="text-xs font-semibold text-neutral-300 flex items-center justify-between">
-              <span>Video / File Source</span>
-              {localFileName && <span className="text-[10px] text-emerald-400 font-mono">Uploaded: {localFileName}</span>}
-            </label>
+            <div className="flex items-center justify-between text-xs font-semibold text-neutral-300">
+              <span className="flex items-center gap-1.5">
+                <HardDrive className="w-3.5 h-3.5 text-amber-400" />
+                <span>Media Storage & Video Source</span>
+              </span>
+              {fileSizeBytes > 0 && (
+                <span className="text-[10px] text-emerald-400 font-mono">
+                  {formatBytes(fileSizeBytes)} • IndexedDB Cached
+                </span>
+              )}
+            </div>
 
             {/* Direct File Picker (Mobile Phone friendly) */}
             <div className="flex gap-2 items-center">
               <label className="flex-1 cursor-pointer bg-neutral-900 hover:bg-neutral-800 border border-dashed border-neutral-700 hover:border-amber-500/60 p-3 rounded-xl flex items-center justify-center gap-2 text-xs text-neutral-300 transition">
                 <Upload className="w-4 h-4 text-amber-400" />
-                <span>Upload from Phone / PC (MP4, MOV, PNG)</span>
+                <span>
+                  {localFileName ? `Replace: ${localFileName}` : 'Upload from Phone/PC (Auto-Cached in IndexedDB)'}
+                </span>
                 <input 
                   type="file" 
                   accept="video/*,image/*" 
@@ -203,18 +271,21 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
               </label>
             </div>
 
-            {/* Or Paste Direct URL */}
+            {/* Or Paste Cloudflare R2 / S3 Direct URL */}
             <div className="pt-1">
               <input
                 type="text"
                 value={mediaUrl}
-                onChange={(e) => setMediaUrl(e.target.value)}
-                placeholder="Or paste direct video/image URL (R2, Render, Google Drive, S3)"
+                onChange={(e) => {
+                  setMediaUrl(e.target.value);
+                  setPendingFileBlob(null);
+                }}
+                placeholder="Or paste Cloudflare R2 / S3 / Google Drive public URL"
                 className="w-full bg-neutral-900 border border-neutral-800 rounded-lg px-3 py-1.5 text-[11px] text-neutral-300 font-mono focus:outline-none focus:border-amber-500"
               />
             </div>
 
-            {/* Quick Presets */}
+            {/* Presets */}
             <div className="flex items-center gap-1.5 overflow-x-auto pt-1 text-[10px]">
               <span className="text-neutral-500 font-mono uppercase">Presets:</span>
               {PRESET_VIDEOS.map((preset, idx) => (
@@ -228,6 +299,52 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
                 </button>
               ))}
             </div>
+          </div>
+
+          {/* Passcode Protection Lock Section */}
+          <div className="p-3 bg-neutral-950 rounded-2xl border border-neutral-800 space-y-3">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <KeyRound className="w-4 h-4 text-amber-400" />
+                <div>
+                  <span className="text-xs font-semibold text-neutral-200 block">4-Digit PIN Passcode Gate</span>
+                  <span className="text-[10px] text-neutral-400">Client must enter this PIN before watching preview</span>
+                </div>
+              </div>
+              <label className="relative inline-flex items-center cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={isProtected}
+                  onChange={(e) => setIsProtected(e.target.checked)}
+                  className="sr-only peer"
+                />
+                <div className="w-9 h-5 bg-neutral-800 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-4 after:w-4 after:transition-all peer-checked:bg-amber-500"></div>
+              </label>
+            </div>
+
+            {isProtected && (
+              <div className="pt-2 border-t border-neutral-800/80 flex items-center justify-between gap-3 animate-in fade-in">
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-neutral-400">Access PIN:</span>
+                  <input
+                    type="text"
+                    maxLength={4}
+                    value={passcode}
+                    onChange={(e) => setPasscode(e.target.value.replace(/[^0-9]/g, ''))}
+                    className="w-24 bg-neutral-900 border border-neutral-700 text-amber-400 font-mono font-bold text-center text-sm py-1 rounded-lg focus:outline-none focus:border-amber-500"
+                  />
+                </div>
+
+                <button
+                  type="button"
+                  onClick={generateRandomPin}
+                  className="inline-flex items-center gap-1.5 text-xs text-neutral-400 hover:text-amber-400 bg-neutral-900 px-2.5 py-1 rounded-lg border border-neutral-800 transition"
+                >
+                  <RefreshCw className="w-3 h-3" />
+                  <span>Random PIN</span>
+                </button>
+              </div>
+            )}
           </div>
 
           {/* Client Details */}
@@ -328,7 +445,7 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
                   type="text"
                   value={watermarkText}
                   onChange={(e) => setWatermarkText(e.target.value)}
-                  placeholder="DRAFT PREVIEW • PAYMENT PENDING"
+                  placeholder="EDITLOCK • DRAFT REVIEW"
                   className="w-full bg-neutral-900 border border-neutral-700 text-neutral-200 text-xs rounded-xl px-3 py-1.5 focus:outline-none focus:border-amber-500 uppercase font-mono"
                 />
               </div>
@@ -340,10 +457,10 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
                   onChange={(e) => setWatermarkSpeed(e.target.value as WatermarkSpeed)}
                   className="w-full bg-neutral-900 border border-neutral-700 text-neutral-200 text-xs rounded-xl px-3 py-1.5 focus:outline-none focus:border-amber-500"
                 >
+                  <option value="medium">Continuous Floating Drift (Subtle)</option>
                   <option value="bouncing">DVD Bouncing Physics (Anti-AI Mask)</option>
-                  <option value="medium">Continuous Floating Drift</option>
-                  <option value="fast">Fast Jitter Drift</option>
-                  <option value="slow">Gentle Float</option>
+                  <option value="slow">Gentle Drift</option>
+                  <option value="fast">Fast Jitter</option>
                 </select>
               </div>
             </div>
@@ -356,7 +473,7 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
                   onChange={(e) => setShowTimecode(e.target.checked)}
                   className="accent-amber-500 rounded"
                 />
-                <span className="text-[11px]">Show Live Video Timecode (Stops auto-cropping)</span>
+                <span className="text-[11px]">Show Live Video Timecode</span>
               </label>
 
               <label className="flex items-center gap-2 cursor-pointer">
@@ -366,7 +483,7 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
                   onChange={(e) => setShowClientTag(e.target.checked)}
                   className="accent-amber-500 rounded"
                 />
-                <span className="text-[11px]">Show Client Name on screen</span>
+                <span className="text-[11px]">Show Client Tag</span>
               </label>
             </div>
           </div>
@@ -376,15 +493,17 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
             <button
               type="button"
               onClick={onClose}
+              disabled={isSavingMedia}
               className="flex-1 py-3 bg-neutral-800 hover:bg-neutral-700 text-neutral-300 rounded-xl text-xs font-semibold transition"
             >
               Cancel
             </button>
             <button
               type="submit"
+              disabled={isSavingMedia}
               className="flex-2 py-3 bg-gradient-to-r from-amber-500 to-amber-600 hover:from-amber-400 hover:to-amber-500 text-neutral-950 font-bold rounded-xl text-xs transition shadow-lg shadow-amber-500/20"
             >
-              {initialProject ? 'Save Changes' : 'Create & Generate Client Review Link'}
+              {isSavingMedia ? 'Saving Media...' : initialProject ? 'Save Changes' : 'Create & Generate Review Link'}
             </button>
           </div>
         </form>

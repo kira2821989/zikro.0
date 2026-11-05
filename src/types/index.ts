@@ -44,6 +44,18 @@ export interface PaymentDetails {
   verified?: boolean;
 }
 
+export interface SecuritySettings {
+  isProtected: boolean;
+  passcode?: string; // 4-digit PIN e.g. "4821"
+}
+
+export interface StorageInfo {
+  storageType: 'indexeddb' | 'cloud_url';
+  fileSizeBytes?: number;
+  originalFileName?: string;
+  blobKey?: string;
+}
+
 export interface Project {
   id: string;
   title: string;
@@ -59,6 +71,8 @@ export interface Project {
   thumbnailUrl?: string;
   durationSeconds?: number;
   watermarkSettings: WatermarkSettings;
+  securitySettings?: SecuritySettings;
+  storageInfo?: StorageInfo;
   status: ProjectStatus;
   createdAt: string;
   updatedAt: string;

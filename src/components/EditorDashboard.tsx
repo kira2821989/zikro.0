@@ -17,9 +17,12 @@ import {
   ShieldCheck,
   Zap,
   Trash2,
-  Edit3
+  Edit3,
+  KeyRound,
+  HardDrive
 } from 'lucide-react';
 import { Project } from '../types';
+import { formatBytes } from '../utils/mediaDb';
 import { playClickPop } from '../utils/audio';
 
 interface EditorDashboardProps {
@@ -191,17 +194,22 @@ export const EditorDashboard: React.FC<EditorDashboardProps> = ({
                   </div>
                 </div>
 
-                {/* Fee & UPI preview */}
+                {/* Fee & Security preview */}
                 <div className="p-2.5 bg-neutral-950/70 rounded-xl border border-neutral-800/80 flex items-center justify-between text-xs font-mono">
                   <div>
                     <span className="text-[10px] text-neutral-500 block">Fee Due</span>
                     <span className="font-bold text-amber-400 text-sm">₹{proj.amountINR.toLocaleString('en-IN')}</span>
                   </div>
-                  <div className="text-right">
-                    <span className="text-[10px] text-neutral-500 block">Watermark</span>
-                    <span className="text-[11px] text-neutral-300">
-                      {isPaid ? 'Removed' : proj.watermarkSettings.speed === 'bouncing' ? 'DVD Bounce' : 'Floating Drift'}
-                    </span>
+                  <div className="text-right flex flex-col items-end">
+                    <span className="text-[10px] text-neutral-500 block">Protection</span>
+                    {proj.securitySettings?.isProtected ? (
+                      <span className="inline-flex items-center gap-1 text-[10px] text-amber-300 font-bold bg-amber-500/10 px-1.5 py-0.5 rounded border border-amber-500/30">
+                        <KeyRound className="w-2.5 h-2.5 text-amber-400" />
+                        <span>PIN: {proj.securitySettings.passcode}</span>
+                      </span>
+                    ) : (
+                      <span className="text-[11px] text-neutral-400">Direct Link</span>
+                    )}
                   </div>
                 </div>
               </div>

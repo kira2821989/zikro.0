@@ -98,6 +98,10 @@ export const INITIAL_PROJECTS: Project[] = [
       showTimecode: true,
       fontSize: 'medium'
     },
+    securitySettings: {
+      isProtected: true,
+      passcode: '4821'
+    },
     comments: [
       {
         id: 'c4',

@@ -35,6 +35,8 @@ import { WhatsAppShareModal } from './components/WhatsAppShareModal';
 import { InvoiceModal } from './components/InvoiceModal';
 import { ProjectFormModal } from './components/ProjectFormModal';
 import { EditorDashboard } from './components/EditorDashboard';
+import { PasscodeLockModal } from './components/PasscodeLockModal';
+import { getMediaBlobUrl } from './utils/mediaDb';
 import { playClickPop, playPaymentSuccessChime } from './utils/audio';
 
 const STORAGE_KEY = 'editlock_projects_v2';
@@ -82,7 +84,44 @@ export default function App() {
     }
   }, [projects]);
 
+  // Session-cached unlocked PIN project IDs
+  const [unlockedPinProjects, setUnlockedPinProjects] = useState<Set<string>>(() => {
+    const set = new Set<string>();
+    try {
+      const saved = sessionStorage.getItem('editlock_unlocked_pins');
+      if (saved) {
+        JSON.parse(saved).forEach((id: string) => set.add(id));
+      }
+    } catch {
+      // ignore
+    }
+    return set;
+  });
+
+  const handleUnlockPasscode = (projectId: string) => {
+    setUnlockedPinProjects(prev => {
+      const next = new Set(prev);
+      next.add(projectId);
+      try {
+        sessionStorage.setItem('editlock_unlocked_pins', JSON.stringify(Array.from(next)));
+      } catch {}
+      return next;
+    });
+    playPaymentSuccessChime();
+  };
+
   const activeProject = projects.find(p => p.id === activeProjectId) || projects[0];
+
+  // Hydrate video mediaUrl from IndexedDB if stored locally
+  useEffect(() => {
+    if (activeProject && activeProject.storageInfo?.storageType === 'indexeddb') {
+      getMediaBlobUrl(activeProject.id).then(blobUrl => {
+        if (blobUrl && blobUrl !== activeProject.mediaUrl) {
+          handleUpdateActiveProject({ mediaUrl: blobUrl });
+        }
+      });
+    }
+  }, [activeProjectId]);
 
   const handleUpdateActiveProject = (updated: Partial<Project>) => {
     setProjects(prev => prev.map(p => {
@@ -333,7 +372,31 @@ export default function App() {
             )}
           </div>
 
-          <div className="flex items-center gap-3 text-xs">
+          <div className="flex items-center gap-3 text-xs flex-wrap">
+            {/* Passcode State Toggle */}
+            {activeProject.securitySettings?.isProtected && (
+              <button
+                onClick={() => {
+                  setUnlockedPinProjects(prev => {
+                    const next = new Set(prev);
+                    if (next.has(activeProject.id)) {
+                      next.delete(activeProject.id);
+                    } else {
+                      next.add(activeProject.id);
+                    }
+                    return next;
+                  });
+                  playClickPop();
+                }}
+                className="text-[11px] font-mono text-amber-300 hover:text-white underline"
+                title="Toggle PIN lock state for testing"
+              >
+                {unlockedPinProjects.has(activeProject.id) 
+                  ? `[Re-Lock PIN: ${activeProject.securitySettings.passcode}]` 
+                  : `[PIN: ${activeProject.securitySettings.passcode} (Locked)]`}
+              </button>
+            )}
+
             {/* Quick Demo Toggle: Paid vs Unpaid */}
             <button
               onClick={() => {
@@ -399,7 +462,17 @@ export default function App() {
           />
         ) : (
           /* Client Review Mode (What the client sees on mobile) */
-          <div className="space-y-6">
+          <>
+            {/* If Project is Protected and PIN not entered, show Passcode Lock Screen */}
+            {activeProject.securitySettings?.isProtected && !unlockedPinProjects.has(activeProject.id) && (
+              <PasscodeLockModal
+                project={activeProject}
+                onUnlockSuccess={() => handleUnlockPasscode(activeProject.id)}
+                isEditorViewing={false}
+              />
+            )}
+
+            <div className="space-y-6">
             
             {/* Project Header Info */}
             <div className="flex items-center justify-between flex-wrap gap-3 pb-3 border-b border-neutral-800">
@@ -504,7 +577,8 @@ export default function App() {
               </div>
             </div>
           </div>
-        )}
+        </>
+      )}
       </main>
 
       {/* 4. Modals */}
