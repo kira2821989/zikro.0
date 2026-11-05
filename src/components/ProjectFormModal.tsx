@@ -34,10 +34,10 @@ export const ProjectFormModal: React.FC<ProjectFormModalProps> = ({
   const [localFileName, setLocalFileName] = useState('');
   
   // Watermark Settings
-  const [watermarkText, setWatermarkText] = useState(initialProject?.watermarkSettings?.text || 'DRAFT PREVIEW • PAYMENT PENDING • EDITLOCK');
+  const [watermarkText, setWatermarkText] = useState(initialProject?.watermarkSettings?.text || 'EDITLOCK • DRAFT REVIEW');
   const [watermarkSpeed, setWatermarkSpeed] = useState<WatermarkSpeed>(initialProject?.watermarkSettings?.speed || 'medium');
   const [watermarkStyle, setWatermarkStyle] = useState<WatermarkStyle>(initialProject?.watermarkSettings?.style || 'diagonal-floating');
-  const [watermarkOpacity, setWatermarkOpacity] = useState<number>(initialProject?.watermarkSettings?.opacity || 0.65);
+  const [watermarkOpacity, setWatermarkOpacity] = useState<number>(initialProject?.watermarkSettings?.opacity || 0.28);
   const [showTimecode, setShowTimecode] = useState(initialProject?.watermarkSettings?.showTimecode ?? true);
   const [showClientTag, setShowClientTag] = useState(initialProject?.watermarkSettings?.showClientTag ?? true);
 

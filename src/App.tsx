@@ -37,7 +37,7 @@ import { ProjectFormModal } from './components/ProjectFormModal';
 import { EditorDashboard } from './components/EditorDashboard';
 import { playClickPop, playPaymentSuccessChime } from './utils/audio';
 
-const STORAGE_KEY = 'editlock_projects_v1';
+const STORAGE_KEY = 'editlock_projects_v2';
 
 export default function App() {
   // Initialize projects from localStorage or default seed
@@ -45,7 +45,15 @@ export default function App() {
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
-        return JSON.parse(saved);
+        const parsed: Project[] = JSON.parse(saved);
+        // Normalize any old heavy opacities to subtle ~0.28
+        return parsed.map(p => ({
+          ...p,
+          watermarkSettings: {
+            ...p.watermarkSettings,
+            opacity: Math.min(p.watermarkSettings?.opacity || 0.28, 0.35)
+          }
+        }));
       }
     } catch (e) {
       console.warn('Failed reading from localStorage:', e);

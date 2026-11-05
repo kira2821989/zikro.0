@@ -43,6 +43,7 @@ export const VideoPlayerWithTimeline: React.FC<VideoPlayerProps> = ({
   const [playbackRate, setPlaybackRate] = useState(1);
   const [showControls, setShowControls] = useState(true);
   const [videoError, setVideoError] = useState(false);
+  const [liveOpacity, setLiveOpacity] = useState<number>(0.28);
   const isUnlocked = project.status === 'paid_unlocked';
 
   // Sync duration when metadata loads
@@ -189,6 +190,7 @@ export const VideoPlayerWithTimeline: React.FC<VideoPlayerProps> = ({
           isUnlocked={isUnlocked}
           currentTime={currentTime}
           duration={duration}
+          customOpacity={liveOpacity}
         />
 
         {/* Play/Pause Center Tap Badge overlay (Briefly visible on pause) */}
@@ -363,6 +365,54 @@ export const VideoPlayerWithTimeline: React.FC<VideoPlayerProps> = ({
           </button>
         )}
       </div>
+
+      {/* 3. Watermark Transparency & Review Clarity Tuner */}
+      {!isUnlocked && (
+        <div className={`w-full mt-2.5 p-2 bg-neutral-900/60 border border-neutral-800/80 rounded-xl flex items-center justify-between flex-wrap gap-2 text-[11px] ${
+          isVertical ? 'max-w-[340px] sm:max-w-[380px]' : 'max-w-3xl'
+        }`}>
+          <div className="flex items-center gap-1.5 text-neutral-400">
+            <Lock className="w-3.5 h-3.5 text-amber-400" />
+            <span className="font-medium">Watermark Visibility:</span>
+          </div>
+
+          <div className="flex items-center gap-1 bg-neutral-950 p-0.5 rounded-lg border border-neutral-800">
+            <button
+              type="button"
+              onClick={() => setLiveOpacity(0.15)}
+              className={`px-2 py-0.5 rounded text-[10px] font-mono transition ${
+                liveOpacity === 0.15 
+                  ? 'bg-amber-500 text-neutral-950 font-bold' 
+                  : 'text-neutral-400 hover:text-white'
+              }`}
+            >
+              Ghost (15%)
+            </button>
+            <button
+              type="button"
+              onClick={() => setLiveOpacity(0.28)}
+              className={`px-2 py-0.5 rounded text-[10px] font-mono transition ${
+                liveOpacity === 0.28 
+                  ? 'bg-amber-500 text-neutral-950 font-bold' 
+                  : 'text-neutral-400 hover:text-white'
+              }`}
+            >
+              Subtle (28%)
+            </button>
+            <button
+              type="button"
+              onClick={() => setLiveOpacity(0.42)}
+              className={`px-2 py-0.5 rounded text-[10px] font-mono transition ${
+                liveOpacity === 0.42 
+                  ? 'bg-amber-500 text-neutral-950 font-bold' 
+                  : 'text-neutral-400 hover:text-white'
+              }`}
+            >
+              Standard (42%)
+            </button>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

@@ -3,7 +3,7 @@ export type AspectRatio = '9:16' | '16:9' | '1:1';
 export type ProjectStatus = 'draft' | 'in_review' | 'revision_requested' | 'paid_unlocked';
 export type CommentCategory = 'cut' | 'text' | 'audio' | 'color' | 'general';
 export type WatermarkSpeed = 'slow' | 'medium' | 'fast' | 'bouncing';
-export type WatermarkStyle = 'diagonal-floating' | 'bouncing-box' | 'screen-tile' | 'anti-rip-crosshair';
+export type WatermarkStyle = 'diagonal-floating' | 'bouncing-box' | 'screen-tile' | 'anti-rip-crosshair' | 'ghost-outline' | 'compact-pill';
 
 export interface CommentReply {
   id: string;

@@ -54,17 +54,23 @@ export const ThumbnailReviewer: React.FC<ThumbnailReviewerProps> = ({
               <span>FOR: {project.clientName}</span>
             </div>
 
-            {/* Repetitive Diagonal Watermark Grid */}
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 p-6 opacity-60 place-items-center">
+            {/* Delicate Stencil Watermark Grid without heavy dark boxes */}
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-6 p-6 opacity-30 place-items-center select-none">
               {Array.from({ length: 6 }).map((_, i) => (
                 <div 
                   key={i} 
-                  className="transform -rotate-20 bg-neutral-950/80 border border-red-500/60 p-2.5 rounded-lg text-center backdrop-blur-[2px] shadow-lg"
+                  className="transform -rotate-20 text-center select-none"
                 >
-                  <div className="text-red-400 font-extrabold text-xs uppercase tracking-widest">
-                    {project.watermarkSettings.text}
+                  <div 
+                    className="text-white font-extrabold text-xs sm:text-sm uppercase tracking-widest"
+                    style={{
+                      textShadow: '0 2px 4px rgba(0,0,0,0.9)',
+                      WebkitTextStroke: '0.5px rgba(255,255,255,0.8)'
+                    }}
+                  >
+                    {project.watermarkSettings.text || 'EDITLOCK PREVIEW'}
                   </div>
-                  <div className="text-[10px] text-neutral-300 font-mono">
+                  <div className="text-[9px] text-amber-300 font-mono tracking-wider drop-shadow">
                     UNPAID • DO NOT PUBLISH
                   </div>
                 </div>
@@ -72,8 +78,8 @@ export const ThumbnailReviewer: React.FC<ThumbnailReviewerProps> = ({
             </div>
 
             {/* Bottom Bar */}
-            <div className="p-3 bg-gradient-to-t from-black/80 to-transparent text-center text-[10px] font-mono text-neutral-400">
-              PROTECTED BY EDITLOCK • 100% UNLOCKED AFTER UPI APPROVAL
+            <div className="p-2 bg-gradient-to-t from-black/60 to-transparent text-center text-[9px] font-mono text-neutral-400">
+              PROTECTED BY EDITLOCK • UNLOCK CLEAN HD IMAGE VIA UPI
             </div>
           </div>
         )}
